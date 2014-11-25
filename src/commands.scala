@@ -13,6 +13,8 @@ import java.io.File
 import com.android.ddmlib._
 import com.android.SdkConstants
 
+import scala.util.Try
+
 object Commands {
 
   var defaultDevice: Option[String] = None
@@ -544,8 +546,8 @@ object Commands {
       val sdk = sdkpath(state)
       val thisProject = Project.extract(state).getOpt(sbt.Keys.thisProjectRef)
       val packageName = thisProject flatMap { prj =>
-        Project.extract(state).getOpt(
-          Keys.packageName in(prj, Keys.Android))
+        Try(Project.extract(state).runTask(
+          Keys.packageName in(prj, Keys.Android), state)).toOption map (_._2)
       }
       val targetPackage = Option(str).filter(_.nonEmpty) orElse packageName
       if (targetPackage.isEmpty)
@@ -562,8 +564,8 @@ object Commands {
       val sdk = sdkpath(state)
       val thisProject = Project.extract(state).getOpt(sbt.Keys.thisProjectRef)
       val packageName = thisProject flatMap { prj =>
-        Project.extract(state).getOpt(
-          Keys.packageName in(prj, Keys.Android))
+        Try(Project.extract(state).runTask(
+          Keys.packageName in(prj, Keys.Android), state)).toOption map (_._2)
       }
       if (packageName.isEmpty)
         sys.error("Unable to determine package name\n\n" +
